@@ -2,7 +2,7 @@ from http import HTTPStatus
 
 import pytest
 
-from app.exceptions import BadCredentials, InvalidCredentials
+from app.exceptions import InvalidCredentials
 
 
 def test_no_credentials(client):
@@ -16,14 +16,6 @@ def test_invalid_password(client, test_user):
         client.get(
             '/users',
             headers={'Authorization': f'Basic {test_user.base64_invalid_password}'},
-        )
-
-
-def test_bad_credentials(client, test_user):
-    with pytest.raises(BadCredentials):
-        client.get(
-            '/users',
-            headers={'Authorization': f'Basic {test_user.base64_invalid_username}'},
         )
 
 

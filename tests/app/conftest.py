@@ -29,19 +29,13 @@ def client():
 def test_user():
     _test_user = UserService.create(schemas.UserCreate(name='test', password='test'))
 
-    setattr(
-        _test_user, 'base64', b64encode('test:test'.encode('utf-8')).decode('utf-8')
-    )
-    setattr(
-        _test_user,
-        'base64_invalid_username',
+    _test_user.base64 = b64encode('test:test'.encode('utf-8')).decode('utf-8')
+    _test_user.base64_invalid_username = (
         b64encode('wrong:test'.encode('utf-8')).decode('utf-8'),
     )
-    setattr(
-        _test_user,
-        'base64_invalid_password',
+    _test_user.base64_invalid_password = (
         b64encode('test:wrong'.encode('utf-8')).decode('utf-8'),
     )
-    setattr(_test_user, 'password_not_hashed', 'test')
+    _test_user.password_not_hashed = 'test'
 
     return _test_user

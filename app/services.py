@@ -3,9 +3,12 @@ import secrets
 import string
 from hashlib import pbkdf2_hmac
 
+from fastapi.security import HTTPBasicCredentials
+from loguru import logger
+
 from app import models, schemas
 from app.database import create_session
-from app.exceptions import UserAlreadyExists
+from app.exceptions import InvalidCredentials, UserAlreadyExists
 
 
 class UserService:
@@ -36,10 +39,22 @@ class UserService:
 
             session.add(user)
 
+        logger.info(f'{user} was created')
         return user
 
 
 class SecurityService:
+    @staticmethod
+    def authenticate_user(credentials: HTTPBasicCredentials):
+        user = UserService.find_by_name(credentials.username)
+
+        if not user or not SecurityService.validate_password(
+            hashed_password=user.password, password=credentials.password, salt=user.salt
+        ):
+            raise InvalidCredentials()
+
+        logger.info(f'{user} passed authentication')
+
     @staticmethod
     def hash_password(password: str, salt: str) -> str:
         hashed_password = pbkdf2_hmac('sha256', password.encode(), salt.encode(), 10)
@@ -71,4 +86,27 @@ class MovieService:
             movie = models.Movie(title=movie.title)
             session.add(movie)
 
+        logger.info(f'{movie} was created')
         return movie
+
+    @staticmethod
+    def find_by_id(movie_id: int):
+        with create_session(expire_on_commit=False) as session:
+            movie = (
+                session.query(models.Movie).filter(models.Movie.id == movie_id).first()
+            )
+
+        return movie
+
+
+class ReviewService:
+    @staticmethod
+    def create_review(review: schemas.ReviewCreate, movie_id: int, user_id: int):
+        with create_session(expire_on_commit=False) as session:
+            rev = models.Review(
+                rating=review.rating, movie_id=movie_id, user_id=user_id
+            )
+            session.add(rev)
+
+        logger.info(f'{rev} was created')
+        return rev

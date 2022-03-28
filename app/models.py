@@ -16,6 +16,9 @@ class User(Base):
 
     reviews = relationship('Review', uselist=True, lazy='subquery')
 
+    def __repr__(self):
+        return f'User(id:{self.id}, name:{self.name}'
+
 
 class Movie(Base):
     __tablename__ = 'movies'
@@ -29,12 +32,18 @@ class Movie(Base):
 
     reviews = relationship('Review', uselist=True, lazy='subquery')
 
+    def __repr__(self):
+        return f'Movie(id:{self.id}, title:{self.title}'
+
 
 class Review(Base):
     __tablename__ = 'reviews'
 
     id = Column(Integer, primary_key=True)
     rating = Column(Integer, nullable=False)
-    comment = Column(String, nullable=True, unique=False)
+    comment = Column(String, nullable=False)
     movie_id = Column(Integer, ForeignKey(Movie.id))
     user_id = Column(Integer, ForeignKey(User.id))
+
+    def __repr__(self):
+        return f'Review(id:{self.id}, user_id:{self.user_id}, movie_id:{self.movie_id})'

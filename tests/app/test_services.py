@@ -1,7 +1,8 @@
 import pytest
+from fastapi.security import HTTPBasicCredentials
 
 from app import schemas
-from app.exceptions import UserAlreadyExists
+from app.exceptions import InvalidCredentials, UserAlreadyExists
 from app.services import SecurityService, UserService
 
 
@@ -32,3 +33,12 @@ def test_create_user_exception(test_user):
             name=test_user.name, password=test_user.password_not_hashed
         )
         UserService.create(user)
+
+
+def test_authenticate_invalid_user(test_user):
+    with pytest.raises(InvalidCredentials):
+        SecurityService.authenticate_user(
+            credentials=HTTPBasicCredentials(
+                username=test_user.name, password=test_user.password
+            )
+        )
