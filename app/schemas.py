@@ -5,7 +5,7 @@ from pydantic import BaseModel, constr, validator
 
 class ReviewBase(BaseModel):
     rating: int
-    comment: constr(min_length=1)
+    comment: str
 
     @validator('rating')
     def range_rating(cls, v):
@@ -54,7 +54,10 @@ class Movie(MovieBase):
     ratings_avg: int
     ratings_counts: int
     comments_count: int
-    reviews: list[Review]
 
     class Config:
         orm_mode = True
+
+
+class MovieReviews(Movie):
+    reviews: list[Review]

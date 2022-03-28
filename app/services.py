@@ -104,9 +104,17 @@ class ReviewService:
     def create_review(review: schemas.ReviewCreate, movie_id: int, user_id: int):
         with create_session(expire_on_commit=False) as session:
             rev = models.Review(
-                rating=review.rating, movie_id=movie_id, user_id=user_id
+                rating=review.rating, movie_id=movie_id, user_id=user_id,
+                comment=review.comment
             )
             session.add(rev)
 
         logger.info(f'{rev} was created')
         return rev
+
+    @staticmethod
+    def get_by_movie_id(movie_id: int):
+        with create_session(expire_on_commit=False) as session:
+            revs = session.query(models.Review).filter(models.Review.movie_id == movie_id)
+
+        return revs

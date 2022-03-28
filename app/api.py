@@ -63,3 +63,15 @@ def create_movie_review(
     user = UserService.find_by_name(credentials.username)
 
     ReviewService.create_review(review=review, movie_id=movie_id, user_id=user.id)
+
+
+@api.get('/movies/{movie_id}/reviews')
+def get_movie_reviews(
+    movie_id: int,
+    credentials: HTTPBasicCredentials = Depends(security),
+):
+    SecurityService.authenticate_user(credentials)
+
+    reviews = ReviewService.get_by_movie_id(movie_id)
+
+    return [schemas.Review.from_orm(rev) for rev in reviews]
