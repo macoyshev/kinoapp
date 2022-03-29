@@ -53,8 +53,8 @@ class MovieCreate(MovieBase):
 class Movie(MovieBase):
     id: int
     realise_date: date
-    ratings_avg: int
-    ratings_counts: int
+    ratings_avg: str
+    ratings_count: int
     comments_count: int
 
     class Config:

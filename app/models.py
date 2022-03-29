@@ -26,8 +26,9 @@ class Movie(Base):
     id = Column(Integer, primary_key=True)
     title = Column(String(50), unique=True, nullable=False)
     realise_date = Column(Date, default=datetime.utcnow().date())
-    ratings_avg = Column(Integer, default=0)
-    ratings_counts = Column(Integer, default=0)
+    ratings_avg = Column(String(4), default='0.0')
+    ratings_sum = Column(Integer, default=0)
+    ratings_count = Column(Integer, default=0)
     comments_count = Column(Integer, default=0)
 
     reviews = relationship('Review', uselist=True, lazy='subquery')

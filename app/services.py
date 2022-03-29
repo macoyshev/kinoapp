@@ -129,6 +129,15 @@ class ReviewService:
             )
             session.add(rev)
 
+            # change movie comments and rating count
+            movie = (
+                session.query(models.Movie).filter(models.Movie.id == movie_id).first()
+            )
+            movie.ratings_sum += review.rating
+            movie.comments_count += 1
+            movie.ratings_count += 1
+            movie.ratings_avg = str(round(movie.ratings_sum / movie.ratings_count, 1))
+
         logger.info(f'{rev} was created')
         return rev
 

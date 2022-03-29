@@ -71,6 +71,15 @@ def test_find_movie_by_id(test_movie):
     assert movie.id == test_movie.id
 
 
+def test_movie_params(test_review):
+    movie = MovieService.find_by_id(test_review.movie_id)
+
+    assert movie
+    assert movie.ratings_avg == '5.0'
+    assert movie.comments_count == 1
+    assert movie.ratings_count == 1
+
+
 def test_create_existing_review(test_review):
     with pytest.raises(ResourceAlreadyExists):
         ReviewService.create(
