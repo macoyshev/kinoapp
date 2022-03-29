@@ -12,7 +12,7 @@ security = HTTPBasic()
 create_bd()
 
 
-@api.get('/users')
+@api.get('/users', response_model=list[schemas.User])
 def fetch_users(
     credentials: HTTPBasicCredentials = Depends(security),
 ) -> list[schemas.User]:
@@ -23,14 +23,14 @@ def fetch_users(
     return [schemas.User.from_orm(user) for user in users]
 
 
-@api.post('/users')
+@api.post('/users', response_model=schemas.User)
 def create_user(user: schemas.UserCreate) -> schemas.User:
     user = UserService.create(user)
 
     return schemas.User.from_orm(user)
 
 
-@api.get('/movies')
+@api.get('/movies', response_model=list[schemas.Movie])
 def fetch_movies(
     credentials: HTTPBasicCredentials = Depends(security),
 ) -> list[schemas.Movie]:
@@ -41,7 +41,7 @@ def fetch_movies(
     return [schemas.Movie.from_orm(movie) for movie in movies]
 
 
-@api.post('/movies')
+@api.post('/movies', response_model=schemas.Movie)
 def create_movie(
     movie: schemas.MovieCreate, credentials: HTTPBasicCredentials = Depends(security)
 ) -> schemas.Movie:
@@ -52,7 +52,7 @@ def create_movie(
     return schemas.Movie.from_orm(movie)
 
 
-@api.post('/movies/{movie_id}/reviews')
+@api.post('/movies/{movie_id}/reviews', response_model=schemas.Review)
 def create_movie_review(
     movie_id: int,
     review: schemas.ReviewCreate,
@@ -67,7 +67,7 @@ def create_movie_review(
     return schemas.Review.from_orm(review)
 
 
-@api.get('/movies/{movie_id}/reviews')
+@api.get('/movies/{movie_id}/reviews', response_model=list[schemas.Review])
 def get_movie_reviews(
     movie_id: int,
     credentials: HTTPBasicCredentials = Depends(security),

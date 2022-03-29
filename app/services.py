@@ -30,7 +30,7 @@ class UserService:
     @staticmethod
     def create(user: schemas.UserCreate) -> models.User:
         if UserService.find_by_name(user.name):
-            raise ResourceAlreadyExists()
+            raise ResourceAlreadyExists(entity='user')
 
         salt = SecurityService.generate_random_string()
         hashed_password = SecurityService.hash_password(user.password, salt)
