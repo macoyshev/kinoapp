@@ -36,6 +36,16 @@ def test_create_user_exception(test_user):
         UserService.create(user)
 
 
+def test_movie_reviewed_by_user(test_review):
+    assert ReviewService.movie_reviewed_by_user(
+        test_review.movie_id, test_review.user_id
+    )
+
+
+def test_movie_not_reviewed_by_user(test_movie, test_user):
+    assert not ReviewService.movie_reviewed_by_user(test_movie.id, test_user.id)
+
+
 def test_authenticate_invalid_user(test_user):
     with pytest.raises(InvalidCredentials):
         SecurityService.authenticate_user(
@@ -50,6 +60,32 @@ def test_movie_get_all(test_movie):
 
     assert len(movies) == 1
     assert movies[0].title == test_movie.title
+
+
+@pytest.mark.usefixtures('test_movie')
+@pytest.mark.parametrize('year, expected_len', [(2022, 1), (2024, 0), (2000, 0)])
+def test_movie_get_all_with_year_filter(year, expected_len):
+    movies = MovieService.get_all(year=year)
+
+    assert len(movies) == expected_len
+
+
+@pytest.mark.usefixtures('test_movie')
+@pytest.mark.parametrize('substr, expected_len', [('test', 1), ('te', 1), ('wrong', 0)])
+def test_movie_get_all_with_substr_filter(substr, expected_len):
+    movies = MovieService.get_all(substr=substr)
+
+    assert len(movies) == expected_len
+
+
+@pytest.mark.usefixtures('test_movie')
+@pytest.mark.parametrize(
+    'page, page_size, expected_len', [(0, 1, 1), (1, 10, 0), (2, 2, 0)]
+)
+def test_movie_get_all_with_pagesize_page_filter(page, page_size, expected_len):
+    movies = MovieService.get_all(page=page, page_size=page_size)
+
+    assert len(movies) == expected_len
 
 
 def test_create_existing_movie(test_movie):
@@ -87,13 +123,6 @@ def test_create_existing_review(test_review):
             test_review.movie_id,
             test_review.user_id,
         )
-
-
-def test_find_review_by_user_id(test_review):
-    review = ReviewService.find_by_user_id(test_review.user_id)
-
-    assert review
-    assert review.user_id == test_review.user_id
 
 
 def test_get_by_movie_id(test_review):

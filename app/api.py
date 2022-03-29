@@ -16,11 +16,13 @@ create_bd()
 
 @api.get('/users', response_model=list[schemas.User])
 def fetch_users(
+    page: Optional[int] = None,
+    page_size: Optional[int] = Query(None, alias='page-size'),
     credentials: HTTPBasicCredentials = Depends(security),
 ) -> list[schemas.User]:
     SecurityService.authenticate_user(credentials)
 
-    users = UserService.get_all()
+    users = UserService.get_all(page=page, page_size=page_size)
 
     return [schemas.User.from_orm(user) for user in users]
 
@@ -35,9 +37,9 @@ def create_user(user: schemas.UserCreate) -> schemas.User:
 @api.get('/movies', response_model=list[schemas.Movie])
 def fetch_movies(
     year: Optional[int] = None,
-    page_size: Optional[int] = Query(None, alias='page-size'),
     page: Optional[int] = None,
     substr: Optional[str] = None,
+    page_size: Optional[int] = Query(None, alias='page-size'),
     credentials: HTTPBasicCredentials = Depends(security),
 ) -> list[schemas.Movie]:
     SecurityService.authenticate_user(credentials)
@@ -78,10 +80,14 @@ def create_movie_review(
 @api.get('/movies/{movie_id}/reviews', response_model=list[schemas.Review])
 def get_movie_reviews(
     movie_id: int,
+    page: Optional[int] = None,
+    page_size: Optional[int] = Query(None, alias='page-size'),
     credentials: HTTPBasicCredentials = Depends(security),
 ) -> list[schemas.Review]:
     SecurityService.authenticate_user(credentials)
 
-    reviews = ReviewService.get_by_movie_id(movie_id)
+    reviews = ReviewService.get_by_movie_id(
+        movie_id=movie_id, page=page, page_size=page_size
+    )
 
     return [schemas.Review.from_orm(rev) for rev in reviews]
