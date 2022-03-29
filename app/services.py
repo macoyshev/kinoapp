@@ -77,7 +77,10 @@ class SecurityService:
 class MovieService:
     @staticmethod
     def get_all(
-        substr: Optional[str] = None, year: Optional[int] = None
+        substr: Optional[str] = None,
+        page_size: Optional[int] = None,
+        page: Optional[int] = None,
+        year: Optional[int] = None,
     ) -> list[models.Movie]:
 
         with create_session(expire_on_commit=False) as session:
@@ -86,8 +89,16 @@ class MovieService:
                 movies = movies.filter(
                     sql.extract('year', models.Movie.realise_date) == year
                 )
+
             if substr:
                 movies = movies.filter(models.Movie.title.contains(substr))
+
+            if page_size:
+                movies = movies.limit(page_size)
+
+            if page and page_size:
+                movies = movies.offset(page * page_size)
+
             movies = movies.all()
         return movies
 
