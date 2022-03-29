@@ -6,6 +6,7 @@ from typing import Optional
 
 from fastapi.security import HTTPBasicCredentials
 from loguru import logger
+from sqlalchemy import sql
 
 from app import models, schemas
 from app.database import create_session
@@ -75,10 +76,19 @@ class SecurityService:
 
 class MovieService:
     @staticmethod
-    def get_all() -> list[models.Movie]:
-        with create_session(expire_on_commit=False) as session:
-            movies = session.query(models.Movie).all()
+    def get_all(
+        substr: Optional[str] = None, year: Optional[int] = None
+    ) -> list[models.Movie]:
 
+        with create_session(expire_on_commit=False) as session:
+            movies = session.query(models.Movie)
+            if year:
+                movies = movies.filter(
+                    sql.extract('year', models.Movie.realise_date) == year
+                )
+            if substr:
+                movies = movies.filter(models.Movie.title.contains(substr))
+            movies = movies.all()
         return movies
 
     @staticmethod
@@ -144,11 +154,13 @@ class ReviewService:
     @staticmethod
     def get_by_movie_id(movie_id: int) -> list[models.Movie]:
         with create_session(expire_on_commit=False) as session:
-            revs = session.query(models.Review).filter(
-                models.Review.movie_id == movie_id
+            revs = (
+                session.query(models.Review)
+                .filter(models.Review.movie_id == movie_id)
+                .all()
             )
 
-        return list(revs)
+        return revs
 
     @staticmethod
     def find_by_user_id(user_id: int) -> Optional[models.Review]:

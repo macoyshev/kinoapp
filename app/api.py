@@ -1,3 +1,5 @@
+from typing import Optional
+
 from fastapi import Depends, FastAPI
 from fastapi.security import HTTPBasic, HTTPBasicCredentials
 
@@ -32,11 +34,13 @@ def create_user(user: schemas.UserCreate) -> schemas.User:
 
 @api.get('/movies', response_model=list[schemas.Movie])
 def fetch_movies(
+    year: Optional[int] = None,
+    substr: Optional[str] = None,
     credentials: HTTPBasicCredentials = Depends(security),
 ) -> list[schemas.Movie]:
     SecurityService.authenticate_user(credentials)
 
-    movies = MovieService.get_all()
+    movies = MovieService.get_all(year=year, substr=substr)
 
     return [schemas.Movie.from_orm(movie) for movie in movies]
 
