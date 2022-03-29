@@ -1,6 +1,6 @@
 from datetime import date
 
-from pydantic import BaseModel, constr, validator
+from pydantic import BaseModel, validator
 
 
 class ReviewBase(BaseModel):
@@ -8,7 +8,7 @@ class ReviewBase(BaseModel):
     comment: str
 
     @validator('rating')
-    def range_rating(cls, v):
+    def range_rating(cls, v: int) -> int:
         if v < 0 or v > 10:
             raise ValueError('rating must be from 0 to 10')
         return v
@@ -16,6 +16,8 @@ class ReviewBase(BaseModel):
 
 class Review(ReviewBase):
     id: int
+    user_id: int
+    movie_id: int
 
     class Config:
         orm_mode = True

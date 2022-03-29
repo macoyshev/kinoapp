@@ -57,19 +57,21 @@ def create_movie_review(
     movie_id: int,
     review: schemas.ReviewCreate,
     credentials: HTTPBasicCredentials = Depends(security),
-):
+) -> schemas.Review:
     SecurityService.authenticate_user(credentials)
 
     user = UserService.find_by_name(credentials.username)
 
-    ReviewService.create_review(review=review, movie_id=movie_id, user_id=user.id)
+    review = ReviewService.create(review=review, movie_id=movie_id, user_id=user.id)
+
+    return schemas.Review.from_orm(review)
 
 
 @api.get('/movies/{movie_id}/reviews')
 def get_movie_reviews(
     movie_id: int,
     credentials: HTTPBasicCredentials = Depends(security),
-):
+) -> list[schemas.Review]:
     SecurityService.authenticate_user(credentials)
 
     reviews = ReviewService.get_by_movie_id(movie_id)

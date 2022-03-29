@@ -1,9 +1,10 @@
 import pytest
 from fastapi.security import HTTPBasicCredentials
+from pydantic import ValidationError
 
 from app import schemas
-from app.exceptions import InvalidCredentials, UserAlreadyExists
-from app.services import SecurityService, UserService
+from app.exceptions import InvalidCredentials, ResourceAlreadyExists
+from app.services import MovieService, ReviewService, SecurityService, UserService
 
 
 def test_get_all_users(test_user):
@@ -28,7 +29,7 @@ def test_validate_password(test_user):
 
 
 def test_create_user_exception(test_user):
-    with pytest.raises(UserAlreadyExists):
+    with pytest.raises(ResourceAlreadyExists):
         user = schemas.UserCreate(
             name=test_user.name, password=test_user.password_not_hashed
         )
@@ -41,4 +42,60 @@ def test_authenticate_invalid_user(test_user):
             credentials=HTTPBasicCredentials(
                 username=test_user.name, password=test_user.password
             )
+        )
+
+
+def test_movie_get_all(test_movie):
+    movies = MovieService.get_all()
+
+    assert len(movies) == 1
+    assert movies[0].title == test_movie.title
+
+
+def test_create_existing_movie(test_movie):
+    with pytest.raises(ResourceAlreadyExists):
+        MovieService.create(schemas.MovieCreate(title=test_movie.title))
+
+
+def test_find_movie_by_title(test_movie):
+    movie = MovieService.find_by_title(test_movie.title)
+
+    assert movie
+    assert movie.title == test_movie.title
+
+
+def test_find_movie_by_id(test_movie):
+    movie = MovieService.find_by_id(test_movie.id)
+
+    assert movie
+    assert movie.id == test_movie.id
+
+
+def test_create_existing_review(test_review):
+    with pytest.raises(ResourceAlreadyExists):
+        ReviewService.create(
+            schemas.ReviewCreate(rating=5, comment='ok'),
+            test_review.movie_id,
+            test_review.user_id,
+        )
+
+
+def test_find_review_by_user_id(test_review):
+    review = ReviewService.find_by_user_id(test_review.user_id)
+
+    assert review
+    assert review.user_id == test_review.user_id
+
+
+def test_get_by_movie_id(test_review):
+    reviews = ReviewService.get_by_movie_id(test_review.movie_id)
+
+    assert len(reviews) == 1
+    assert reviews[0].id == test_review.id
+
+
+def test_invalid_rating_for_review(test_user, test_movie):
+    with pytest.raises(ValidationError):
+        ReviewService.create(
+            schemas.ReviewCreate(rating=11, comment='ok'), test_movie.id, test_user.id
         )

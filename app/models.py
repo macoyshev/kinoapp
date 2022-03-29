@@ -16,7 +16,7 @@ class User(Base):
 
     reviews = relationship('Review', uselist=True, lazy='subquery')
 
-    def __repr__(self):
+    def __repr__(self) -> str:
         return f'User(id:{self.id}, name:{self.name}'
 
 
@@ -32,7 +32,7 @@ class Movie(Base):
 
     reviews = relationship('Review', uselist=True, lazy='subquery')
 
-    def __repr__(self):
+    def __repr__(self) -> str:
         return f'Movie(id:{self.id}, title:{self.title}'
 
 
@@ -45,5 +45,5 @@ class Review(Base):
     movie_id = Column(Integer, ForeignKey(Movie.id))
     user_id = Column(Integer, ForeignKey(User.id))
 
-    def __repr__(self):
+    def __repr__(self) -> str:
         return f'Review(id:{self.id}, user_id:{self.user_id}, movie_id:{self.movie_id})'

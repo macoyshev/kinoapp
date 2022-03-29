@@ -37,9 +37,9 @@ def create_session(**kwargs: Any) -> SessionType:
     session = Session(**kwargs)
     try:
         yield session
+        session.commit()
     except Exception:
         session.rollback()
         raise
     finally:
-        session.commit()
         session.close()
