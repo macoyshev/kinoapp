@@ -8,9 +8,7 @@ from app.database import create_bd
 from app.services import MovieService, ReviewService, SecurityService, UserService
 
 api = FastAPI()
-
 security = HTTPBasic()
-
 create_bd()
 
 
