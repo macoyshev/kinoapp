@@ -7,7 +7,7 @@ from app.exceptions import InvalidCredentials, ResourceAlreadyExists
 from app.services import MovieService, ReviewService, SecurityService, UserService
 
 
-def test_get_all_users(test_user):
+def test_get_all_users():
     UserService.create(schemas.UserCreate(name='test1', password='test1'))
     UserService.create(schemas.UserCreate(name='test2', password='test2'))
     UserService.create(schemas.UserCreate(name='test3', password='test3'))
@@ -148,7 +148,7 @@ def test_invalid_rating_for_review(test_user, test_movie):
         )
 
 
-def test_get_top_movies(test_movie, test_user, test_review):
+def test_get_top_movies(test_user, test_movie):
     test_movie2 = MovieService.create(schemas.MovieCreate(title='test2'))
 
     ReviewService.create(
@@ -162,3 +162,4 @@ def test_get_top_movies(test_movie, test_user, test_review):
     assert movies
     assert len(movies) == 2
     assert movies[0].title == test_movie2.title
+    assert movies[1].title == test_movie.title

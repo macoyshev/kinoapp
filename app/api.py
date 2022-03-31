@@ -34,6 +34,8 @@ def create_user(user: schemas.UserCreate) -> schemas.User:
 
 @api.get('/movies', response_model=list[schemas.Movie])
 def fetch_movies(
+    # pylint: disable=too-many-arguments
+    # task requires 5 filters
     top: Optional[int] = None,
     substr: Optional[str] = None,
     year: Optional[int] = None,

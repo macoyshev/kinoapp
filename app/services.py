@@ -4,9 +4,10 @@ import string
 from hashlib import pbkdf2_hmac
 from typing import Optional
 
+import sqlalchemy
 from fastapi.security import HTTPBasicCredentials
 from loguru import logger
-from sqlalchemy import desc, sql
+from sqlalchemy import cast, desc, sql
 
 from app import models, schemas
 from app.database import create_session
@@ -115,7 +116,9 @@ class MovieService:
                 movies = movies.filter(models.Movie.title.contains(substr))
 
             if top:
-                movies = movies.order_by(desc(models.Movie.ratings_avg)).limit(top)
+                movies = movies.order_by(
+                    desc(cast(models.Movie.ratings_avg, sqlalchemy.Float))
+                ).limit(top)
 
             if limit is not None:
                 movies = movies.limit(limit)
