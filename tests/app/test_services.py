@@ -8,10 +8,13 @@ from app.services import MovieService, ReviewService, SecurityService, UserServi
 
 
 def test_get_all_users(test_user):
-    user_test = test_user
-    users = UserService.get_all()
-    assert len(users) == 1
-    assert users[0].name == user_test.name
+    UserService.create(schemas.UserCreate(name='test1', password='test1'))
+    UserService.create(schemas.UserCreate(name='test2', password='test2'))
+    UserService.create(schemas.UserCreate(name='test3', password='test3'))
+
+    users = UserService.get_all(offset=1, limit=2)
+
+    assert len(users) == 2
 
 
 def generate_random_string():
@@ -56,7 +59,7 @@ def test_authenticate_invalid_user(test_user):
 
 
 def test_movie_get_all(test_movie):
-    movies = MovieService.get_all()
+    movies = MovieService.get_all(offset=0, limit=1)
 
     assert len(movies) == 1
     assert movies[0].title == test_movie.title
@@ -83,7 +86,7 @@ def test_movie_get_all_with_substr_filter(substr, expected_len):
     'page, page_size, expected_len', [(0, 1, 1), (1, 10, 0), (2, 2, 0)]
 )
 def test_movie_get_all_with_pagesize_page_filter(page, page_size, expected_len):
-    movies = MovieService.get_all(page=page, page_size=page_size)
+    movies = MovieService.get_all(offset=page, limit=page_size)
 
     assert len(movies) == expected_len
 
@@ -126,7 +129,13 @@ def test_create_existing_review(test_review):
 
 
 def test_get_by_movie_id(test_review):
-    reviews = ReviewService.get_by_movie_id(test_review.movie_id)
+    test_movie2 = MovieService.create(schemas.MovieCreate(title='test2'))
+    ReviewService.create(
+        schemas.ReviewCreate(rating=1, comment='ok'),
+        user_id=test_review.user_id,
+        movie_id=test_movie2.id,
+    )
+    reviews = ReviewService.get_by_movie_id(test_review.movie_id, offset=0, limit=1)
 
     assert len(reviews) == 1
     assert reviews[0].id == test_review.id
@@ -137,3 +146,19 @@ def test_invalid_rating_for_review(test_user, test_movie):
         ReviewService.create(
             schemas.ReviewCreate(rating=11, comment='ok'), test_movie.id, test_user.id
         )
+
+
+def test_get_top_movies(test_movie, test_user, test_review):
+    test_movie2 = MovieService.create(schemas.MovieCreate(title='test2'))
+
+    ReviewService.create(
+        schemas.ReviewCreate(rating=10, comment='ok'),
+        user_id=test_user.id,
+        movie_id=test_movie2.id,
+    )
+
+    movies = MovieService.get_all(top=2)
+
+    assert movies
+    assert len(movies) == 2
+    assert movies[0].title == test_movie2.title

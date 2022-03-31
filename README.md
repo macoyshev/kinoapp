@@ -6,6 +6,9 @@
 ### Create venv:
     make venv
 
+### Run application
+    make up
+
 ### Run tests:
     make test
 
@@ -14,3 +17,6 @@
 
 ### Run formatters:
     make format
+
+
+

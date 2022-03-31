@@ -14,13 +14,13 @@ create_bd()
 
 @api.get('/users', response_model=list[schemas.User])
 def fetch_users(
-    page: Optional[int] = None,
-    page_size: Optional[int] = Query(None, alias='page-size'),
+    offset: Optional[int] = None,
+    limit: Optional[int] = None,
     credentials: HTTPBasicCredentials = Depends(security),
 ) -> list[schemas.User]:
     SecurityService.authenticate_user(credentials)
 
-    users = UserService.get_all(page=page, page_size=page_size)
+    users = UserService.get_all(offset=offset, limit=limit)
 
     return [schemas.User.from_orm(user) for user in users]
 
@@ -34,16 +34,17 @@ def create_user(user: schemas.UserCreate) -> schemas.User:
 
 @api.get('/movies', response_model=list[schemas.Movie])
 def fetch_movies(
-    year: Optional[int] = None,
-    page: Optional[int] = None,
+    top: Optional[int] = None,
     substr: Optional[str] = None,
-    page_size: Optional[int] = Query(None, alias='page-size'),
+    year: Optional[int] = None,
+    offset: Optional[int] = None,
+    limit: Optional[int] = Query(None, alias='per-page'),
     credentials: HTTPBasicCredentials = Depends(security),
 ) -> list[schemas.Movie]:
     SecurityService.authenticate_user(credentials)
 
     movies = MovieService.get_all(
-        year=year, substr=substr, page=page, page_size=page_size
+        year=year, substr=substr, offset=offset, limit=limit, top=top
     )
 
     return [schemas.Movie.from_orm(movie) for movie in movies]
@@ -78,14 +79,14 @@ def create_movie_review(
 @api.get('/movies/{movie_id}/reviews', response_model=list[schemas.Review])
 def get_movie_reviews(
     movie_id: int,
-    page: Optional[int] = None,
-    page_size: Optional[int] = Query(None, alias='page-size'),
+    offset: Optional[int] = None,
+    limit: Optional[int] = Query(None, alias='per-page'),
     credentials: HTTPBasicCredentials = Depends(security),
 ) -> list[schemas.Review]:
     SecurityService.authenticate_user(credentials)
 
     reviews = ReviewService.get_by_movie_id(
-        movie_id=movie_id, page=page, page_size=page_size
+        movie_id=movie_id, offset=offset, limit=limit
     )
 
     return [schemas.Review.from_orm(rev) for rev in reviews]

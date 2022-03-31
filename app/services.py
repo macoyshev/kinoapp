@@ -6,7 +6,7 @@ from typing import Optional
 
 from fastapi.security import HTTPBasicCredentials
 from loguru import logger
-from sqlalchemy import sql
+from sqlalchemy import desc, sql
 
 from app import models, schemas
 from app.database import create_session
@@ -16,19 +16,22 @@ from app.exceptions import InvalidCredentials, ResourceAlreadyExists
 class UserService:
     @staticmethod
     def get_all(
-        page: Optional[int] = None, page_size: Optional[int] = None
+        offset: Optional[int] = None, limit: Optional[int] = None
     ) -> list[models.User]:
         """
-        :param page: number of page
-        :param page_size: count of records in one page
+        :param offset: number of skipped elements
+        :param limit: max number of returned elements
         :return: list of users
         """
 
         with create_session(expire_on_commit=False) as session:
             users = session.query(models.User)
 
-            if page and page_size:
-                users = users.offset(page * page_size).limit(page_size)
+            if limit is not None:
+                users = users.limit(limit)
+
+            if offset is not None:
+                users = users.offset(offset)
 
             users = users.all()
 
@@ -87,16 +90,18 @@ class UserService:
 class MovieService:
     @staticmethod
     def get_all(
+        top: Optional[int] = None,
         substr: Optional[str] = None,
         year: Optional[int] = None,
-        page: Optional[int] = None,
-        page_size: Optional[int] = None,
+        offset: Optional[int] = None,
+        limit: Optional[int] = None,
     ) -> list[models.Movie]:
         """
+        :param top: filter by average rating, filter all movies with rating more t
         :param substr: filter by substring in title
         :param year: filter by year of realise
-        :param page: number of page
-        :param page_size: number of records in one page
+        :param offset: number of skipped elements
+        :param limit: max number of returned elements
         :return: list of movies
         """
 
@@ -109,8 +114,14 @@ class MovieService:
             if substr:
                 movies = movies.filter(models.Movie.title.contains(substr))
 
-            if page and page_size:
-                movies = movies.offset(page * page_size).limit(page_size)
+            if top:
+                movies = movies.order_by(desc(models.Movie.ratings_avg)).limit(top)
+
+            if limit is not None:
+                movies = movies.limit(limit)
+
+            if offset is not None:
+                movies = movies.offset(offset)
 
             movies = movies.all()
 
@@ -204,11 +215,11 @@ class ReviewService:
 
     @staticmethod
     def get_by_movie_id(
-        movie_id: int, page: Optional[int] = None, page_size: Optional[int] = None
+        movie_id: int, offset: Optional[int] = None, limit: Optional[int] = None
     ) -> list[models.Movie]:
         """
-        :param page: number of page
-        :param page_size: number of records in one page
+        :param offset: number of skipped elements
+        :param limit: max number of returned elements
         :param movie_id: id of the movie
         :return: list of reviews on the specified movie
         """
@@ -217,8 +228,11 @@ class ReviewService:
                 models.Review.movie_id == movie_id
             )
 
-            if page and page_size:
-                reviews = reviews.offset(page * page_size).limit(page_size)
+            if limit is not None:
+                reviews = reviews.limit(limit)
+
+            if offset is not None:
+                reviews = reviews.offset(offset)
 
             reviews = reviews.all()
 
