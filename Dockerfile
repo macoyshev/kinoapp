@@ -10,4 +10,4 @@ RUN python3 -m pip install --upgrade pip \
     && poetry config virtualenvs.create false \
     && poetry install
 
-CMD ["uvicorn", "app.api:api", "--host", "0.0.0.0", "--port", "80"]
+CMD ["uvicorn", "app:app", "--host", "0.0.0.0", "--port", "80"]
