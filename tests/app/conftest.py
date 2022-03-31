@@ -3,10 +3,10 @@ from base64 import b64encode
 import pytest
 from fastapi.testclient import TestClient
 
-from app import schemas
-from app.api import api
-from app.database import clear_db, create_bd
-from app.services import MovieService, ReviewService, UserService
+from app.api import schemas
+from app import app
+from app.api.services import MovieService, ReviewService, UserService
+from app.db import clear_db, create_bd
 
 
 @pytest.fixture(autouse=True)
@@ -20,7 +20,7 @@ def _init_db():
 
 @pytest.fixture
 def client():
-    _client = TestClient(api)
+    _client = TestClient(app)
 
     yield _client
 

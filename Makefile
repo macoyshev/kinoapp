@@ -1,7 +1,7 @@
 TESTS = tests
 
 VENV ?= .venv
-CODE = tests app
+CODE = tests api db admin
 
 .PHONY: help
 help: ## Show this help
@@ -38,4 +38,4 @@ ci:	lint test ## Lint code then run tests
 
 .PHOMY: up
 up:
-	uvicorn app.api:api --reload
+	uvicorn app:app --reload

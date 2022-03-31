@@ -2,9 +2,9 @@ import pytest
 from fastapi.security import HTTPBasicCredentials
 from pydantic import ValidationError
 
-from app import schemas
-from app.exceptions import InvalidCredentials, ResourceAlreadyExists
-from app.services import MovieService, ReviewService, SecurityService, UserService
+from app.api import schemas
+from app.api.exceptions import InvalidCredentials, ResourceAlreadyExists
+from app.api.services import MovieService, ReviewService, SecurityService, UserService
 
 
 def test_get_all_users():
@@ -23,14 +23,6 @@ def generate_random_string():
     assert len(salt) == 10
 
 
-def test_validate_password(test_user):
-    assert SecurityService.validate_password(
-        hashed_password=test_user.password,
-        password=test_user.password_not_hashed,
-        salt=test_user.salt,
-    )
-
-
 def test_create_user_exception(test_user):
     with pytest.raises(ResourceAlreadyExists):
         user = schemas.UserCreate(
@@ -42,6 +34,14 @@ def test_create_user_exception(test_user):
 def test_movie_reviewed_by_user(test_review):
     assert ReviewService.movie_reviewed_by_user(
         test_review.movie_id, test_review.user_id
+    )
+
+
+def test_validate_password(test_user):
+    assert SecurityService.validate_password(
+        hashed_password=test_user.password,
+        password=test_user.password_not_hashed,
+        salt=test_user.salt,
     )
 
 
@@ -163,3 +163,14 @@ def test_get_top_movies(test_user, test_movie):
     assert len(movies) == 2
     assert movies[0].title == test_movie2.title
     assert movies[1].title == test_movie.title
+
+
+@pytest.mark.parametrize('limit, expected', [(1, 1), (2, 2), (3, 3)])
+def test_get_all_movies_limit(limit, expected):
+    MovieService.create(schemas.MovieCreate(title='test_1'))
+    MovieService.create(schemas.MovieCreate(title='test_2'))
+    MovieService.create(schemas.MovieCreate(title='test_3'))
+
+    movies = MovieService.get_all(limit=limit)
+
+    assert len(movies) == expected

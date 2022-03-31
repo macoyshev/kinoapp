@@ -16,15 +16,6 @@ def test_invalid_password(client):
     assert res.status_code == 401
 
 
-def test_create_user(client):
-    res = client.post('/users', json={'name': 'max', 'password': 2303})
-    user = res.json()
-
-    assert res.status_code == 200
-    assert user.get('name') == 'max'
-    assert user.get('id') == 1
-
-
 def test_fetch_users(client, test_user):
     res = client.get('/users', headers={'Authorization': f'Basic {test_user.base64}'})
     user = res.json()[0]
@@ -39,16 +30,6 @@ def test_fetch_movies(client, test_user, test_movie):
     movies = res.json()
     assert len(movies) == 1
     assert movies[0].get('title') == test_movie.title
-
-
-def test_create_movie(client, test_user):
-    res = client.post(
-        '/movies',
-        json={'title': 'test'},
-        headers={'Authorization': f'Basic {test_user.base64}'},
-    )
-
-    assert res.json().get('title') == 'test'
 
 
 def test_create_movie_review(client, test_movie, test_user):

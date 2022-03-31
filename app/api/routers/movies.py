@@ -1,38 +1,20 @@
 from typing import Optional
 
-from fastapi import Depends, FastAPI, Query
+from fastapi import APIRouter, Depends
 from fastapi.security import HTTPBasic, HTTPBasicCredentials
 
-from app import schemas
-from app.database import create_bd
-from app.services import MovieService, ReviewService, SecurityService, UserService
+from app.api import schemas
+from app.api.services import SecurityService, MovieService, UserService, ReviewService
 
-api = FastAPI()
+router = APIRouter(
+    prefix="/movies",
+    tags=["movies"],
+)
+
 security = HTTPBasic()
-create_bd()
 
 
-@api.get('/users', response_model=list[schemas.User])
-def fetch_users(
-    offset: Optional[int] = None,
-    limit: Optional[int] = None,
-    credentials: HTTPBasicCredentials = Depends(security),
-) -> list[schemas.User]:
-    SecurityService.authenticate_user(credentials)
-
-    users = UserService.get_all(offset=offset, limit=limit)
-
-    return [schemas.User.from_orm(user) for user in users]
-
-
-@api.post('/users', response_model=schemas.User)
-def create_user(user: schemas.UserCreate) -> schemas.User:
-    user = UserService.create(user)
-
-    return schemas.User.from_orm(user)
-
-
-@api.get('/movies', response_model=list[schemas.Movie])
+@router.get('/', response_model=list[schemas.Movie])
 def fetch_movies(
     # pylint: disable=too-many-arguments
     # task requires 5 filters
@@ -40,7 +22,7 @@ def fetch_movies(
     substr: Optional[str] = None,
     year: Optional[int] = None,
     offset: Optional[int] = None,
-    limit: Optional[int] = Query(None, alias='per-page'),
+    limit: Optional[int] = None,
     credentials: HTTPBasicCredentials = Depends(security),
 ) -> list[schemas.Movie]:
     SecurityService.authenticate_user(credentials)
@@ -52,7 +34,7 @@ def fetch_movies(
     return [schemas.Movie.from_orm(movie) for movie in movies]
 
 
-@api.post('/movies', response_model=schemas.Movie)
+@router.post('/', response_model=schemas.Movie)
 def create_movie(
     movie: schemas.MovieCreate, credentials: HTTPBasicCredentials = Depends(security)
 ) -> schemas.Movie:
@@ -63,7 +45,7 @@ def create_movie(
     return schemas.Movie.from_orm(movie)
 
 
-@api.post('/movies/{movie_id}/reviews', response_model=schemas.Review)
+@router.post('/{movie_id}/reviews', response_model=schemas.Review)
 def create_movie_review(
     movie_id: int,
     review: schemas.ReviewCreate,
@@ -78,11 +60,11 @@ def create_movie_review(
     return schemas.Review.from_orm(review)
 
 
-@api.get('/movies/{movie_id}/reviews', response_model=list[schemas.Review])
+@router.get('/{movie_id}/reviews', response_model=list[schemas.Review])
 def get_movie_reviews(
     movie_id: int,
     offset: Optional[int] = None,
-    limit: Optional[int] = Query(None, alias='per-page'),
+    limit: Optional[int] = None,
     credentials: HTTPBasicCredentials = Depends(security),
 ) -> list[schemas.Review]:
     SecurityService.authenticate_user(credentials)

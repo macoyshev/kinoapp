@@ -9,9 +9,10 @@ from fastapi.security import HTTPBasicCredentials
 from loguru import logger
 from sqlalchemy import cast, desc, sql
 
-from app import models, schemas
-from app.database import create_session
-from app.exceptions import InvalidCredentials, ResourceAlreadyExists
+from app.api import schemas
+from app.api.exceptions import InvalidCredentials, ResourceAlreadyExists
+from app.db import models
+from app.db.utils import create_session
 
 
 class UserService:
@@ -91,14 +92,14 @@ class UserService:
 class MovieService:
     @staticmethod
     def get_all(
-        top: Optional[int] = None,
-        substr: Optional[str] = None,
         year: Optional[int] = None,
+        substr: Optional[str] = None,
+        top: Optional[int] = None,
         offset: Optional[int] = None,
         limit: Optional[int] = None,
     ) -> list[models.Movie]:
         """
-        :param top: filter by average rating, filter all movies with rating more t
+        :param top: filter for a top movies by average rating
         :param substr: filter by substring in title
         :param year: filter by year of realise
         :param offset: number of skipped elements

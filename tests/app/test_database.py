@@ -1,7 +1,7 @@
 import pytest
 from sqlalchemy.orm.exc import UnmappedInstanceError
 
-from app.database import create_session
+from app.db.utils import create_session
 
 
 def test_create_session_invalid_entity():
