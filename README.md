@@ -36,5 +36,5 @@
     docker build . -t kinoapp
 
 ### Create and run docker container
-    docker run -dp 80:80 --rm --name mycontainer kinoapp
+    docker run --name mycontainer --rm -dp 80:80 kinoapp
 
