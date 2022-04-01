@@ -4,6 +4,7 @@ import pytest
 from fastapi.testclient import TestClient
 
 from app import app
+from app.admin import create_admin
 from app.api import schemas
 from app.api.services import MovieService, ReviewService, UserService
 from app.db import clear_db, create_bd
@@ -22,7 +23,7 @@ def _init_db():
 def client():
     _client = TestClient(app)
 
-    yield _client
+    return _client
 
 
 @pytest.fixture(name='test_user')
@@ -57,3 +58,16 @@ def create_test_review(test_movie, test_user):
     )
 
     return review
+
+
+@pytest.fixture
+def client_admin():
+    admin_app = create_admin()
+
+    admin_app.config.update(
+        {
+            'TESTING': True,
+        }
+    )
+
+    return admin_app.test_client()
