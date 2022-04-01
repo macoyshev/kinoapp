@@ -24,12 +24,33 @@ def test_fetch_users(client, test_user):
     assert user.get('name') == test_user.name
 
 
+def test_create_user(client):
+    res = client.post('/users/', json={'name': 'test', 'password': 'test'})
+    user = res.json()
+
+    assert res.status_code == 200
+    assert user.get('name') == 'test'
+    assert user.get('password') is None
+
+
 def test_fetch_movies(client, test_user, test_movie):
     res = client.get('/movies', headers={'Authorization': f'Basic {test_user.base64}'})
 
     movies = res.json()
     assert len(movies) == 1
     assert movies[0].get('title') == test_movie.title
+
+
+def test_create_movie(client, test_user):
+    res = client.post(
+        '/movies/',
+        json={'title': 'test'},
+        headers={'Authorization': f'Basic {test_user.base64}'},
+    )
+    movie = res.json()
+
+    assert res.status_code == 200
+    assert movie.get('title') == 'test'
 
 
 def test_create_movie_review(client, test_movie, test_user):

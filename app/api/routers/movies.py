@@ -4,11 +4,11 @@ from fastapi import APIRouter, Depends
 from fastapi.security import HTTPBasic, HTTPBasicCredentials
 
 from app.api import schemas
-from app.api.services import SecurityService, MovieService, UserService, ReviewService
+from app.api.services import MovieService, ReviewService, SecurityService, UserService
 
 router = APIRouter(
-    prefix="/movies",
-    tags=["movies"],
+    prefix='/movies',
+    tags=['movies'],
 )
 
 security = HTTPBasic()

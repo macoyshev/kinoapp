@@ -1,14 +1,14 @@
 from typing import Optional
 
 from fastapi import APIRouter, Depends
-from fastapi.security import HTTPBasicCredentials, HTTPBasic
+from fastapi.security import HTTPBasic, HTTPBasicCredentials
 
 from app.api import schemas
-from app.api.services import UserService, SecurityService
+from app.api.services import SecurityService, UserService
 
 router = APIRouter(
-    prefix="/users",
-    tags=["users"],
+    prefix='/users',
+    tags=['users'],
 )
 
 security = HTTPBasic()
@@ -32,6 +32,3 @@ def create_user(user: schemas.UserCreate) -> schemas.User:
     user = UserService.create(user)
 
     return schemas.User.from_orm(user)
-
-
-

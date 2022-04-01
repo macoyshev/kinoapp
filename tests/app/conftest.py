@@ -3,8 +3,8 @@ from base64 import b64encode
 import pytest
 from fastapi.testclient import TestClient
 
-from app.api import schemas
 from app import app
+from app.api import schemas
 from app.api.services import MovieService, ReviewService, UserService
 from app.db import clear_db, create_bd
 

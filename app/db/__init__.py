@@ -1,7 +1,7 @@
 from typing import Optional
 
 from sqlalchemy import create_engine
-from sqlalchemy.orm import declarative_base, scoped_session, sessionmaker
+from sqlalchemy.orm import declarative_base, sessionmaker
 
 DATA_BASE_URI = 'sqlite:///app/db/primary.db'
 DATA_BASE_URI_TEST = 'sqlite:///tests/app/test.db'

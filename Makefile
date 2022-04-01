@@ -1,7 +1,7 @@
 TESTS = tests
 
 VENV ?= .venv
-CODE = tests api db admin
+CODE = tests app
 
 .PHONY: help
 help: ## Show this help
@@ -38,4 +38,9 @@ ci:	lint test ## Lint code then run tests
 
 .PHOMY: up
 up:
-	uvicorn app:app --reload
+	$(VENV)/bin/uvicorn app:app --reload
+
+.PHOMY: admin
+admin:
+	FLASK_APP=app.admin FLASK_ENV=development flask run
+

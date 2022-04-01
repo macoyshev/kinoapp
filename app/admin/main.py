@@ -1,18 +1,24 @@
 from flask import Flask
 from flask_admin import Admin
-from flask_admin.contrib.sqla import ModelView
+from sqlalchemy.orm import scoped_session
 
-from app.db import Session
+from app.admin.views import MovieModel, ReviewModel, UserView
+from app.db import Session, create_bd
 from app.db.models import Movie, Review, User
 
-app = Flask(__name__)
 
-# set optional bootswatch theme
-app.config['FLASK_ADMIN_SWATCH'] = 'cerulean'
+def create_admin() -> Flask:
+    app = Flask(__name__)
+    app.secret_key = 'super secret key'
 
-admin = Admin(app, name='kinoapp', template_mode='bootstrap3')
-# Add administrative views here
+    create_bd()
 
-admin.add_view(ModelView(User, Session))
-admin.add_view(ModelView(Movie, Session))
-admin.add_view(ModelView(Review, Session))
+    app.config['FLASK_ADMIN_SWATCH'] = 'cerulean'
+
+    admin = Admin(app, name='kinoapp', template_mode='bootstrap3')
+
+    admin.add_view(UserView(User, scoped_session(Session)))
+    admin.add_view(MovieModel(Movie, scoped_session(Session)))
+    admin.add_view(ReviewModel(Review, scoped_session(Session)))
+
+    return app
